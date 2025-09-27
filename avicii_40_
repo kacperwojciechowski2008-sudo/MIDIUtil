@@ -1,0 +1,42 @@
+from midiutil import MIDIFile
+
+# Parametry projektu
+tempo = 128                 # BPM
+duration_per_chord = 2       # półtakt (2 ćwierćnuty)
+repeats = 5                  # powtórzenie progresji ~40 sekund
+
+# Tworzymy MIDI z 2 trackami: 0-akordy, 1-bas
+midi = MIDIFile(2)
+midi.addTempo(0, 0, tempo)
+midi.addTempo(1, 0, tempo)
+
+# Progresja akordów: C - G - Am - F
+chords = [
+    [60, 64, 67],  # C
+    [55, 59, 62],  # G
+    [57, 60, 64],  # Am
+    [53, 57, 60],  # F
+]
+
+# Funkcja do dodawania nut do tracku
+def add_pattern(track, notes, start_time, duration):
+    for note in notes:
+        midi.addNote(track, track, note, start_time, duration, 90)
+
+# Budujemy patterny
+time = 0
+for _ in range(repeats):
+    for chord in chords:
+        # Track 0: akordy (Pluck / Lead)
+        add_pattern(0, chord, time, duration_per_chord)
+        # Track 1: bas (Saw Bass / 3xOsc, oktawa niżej)
+        add_pattern(1, [chord[0]-12], time, duration_per_chord)
+        time += duration_per_chord
+
+# Zapis do pliku MIDI
+with open("avicii_40s_bit.mid", "wb") as f:
+    midi.writeFile(f)
+
+  
+
+print("Plik avicii_40s_bit.mid został utworzony! 🎵")
